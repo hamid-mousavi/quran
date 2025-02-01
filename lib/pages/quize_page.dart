@@ -1,7 +1,12 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:quran_app/Models/quran_text.dart';
 import 'package:quran_app/blocs/bloc/quran_bloc.dart';
+
+Random random = Random();
+int randomNumber = random.nextInt(101) + 1;
 
 class QuizPage extends StatefulWidget {
   @override
@@ -10,7 +15,7 @@ class QuizPage extends StatefulWidget {
 
 class _QuizPageState extends State<QuizPage> {
   QuranBloc? _quranBloc;
-  int _currentAyaIndex = 1; // مقدار اولیه
+  int _currentAyaIndex = randomNumber; // مقدار اولیه
 
   @override
   void initState() {
@@ -30,7 +35,11 @@ class _QuizPageState extends State<QuizPage> {
           if (state is QuranInitial) {
             return Center(child: CircularProgressIndicator());
           } else if (state is QuranLoaded) {
-            return _buildQuiz(state.nextAya, state.randomOptions);
+            return _buildQuiz(
+              state.nextAya,
+              state.currentAya,
+              state.randomOptions,
+            );
           } else if (state is QuranError) {
             return Center(child: Text(state.message));
           } else {
@@ -41,7 +50,8 @@ class _QuizPageState extends State<QuizPage> {
     );
   }
 
-  Widget _buildQuiz(QuranText nextAya, List<QuranText> options) {
+  Widget _buildQuiz(
+      QuranText nextAya, QuranText currentAya, List<QuranText> options) {
     options.shuffle();
 
     return Padding(
@@ -50,7 +60,7 @@ class _QuizPageState extends State<QuizPage> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
           Text(
-            'What is the next verse after ${nextAya.text}?',
+            'What is the next verse after ${currentAya.text}?',
             style: TextStyle(fontSize: 20.0),
           ),
           SizedBox(height: 20.0),

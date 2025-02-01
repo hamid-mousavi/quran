@@ -13,14 +13,19 @@ class QuranBloc extends Bloc<QuranEvent, QuranState> {
     on<GetNextAya>((event, emit) => _mapGetNextAyaToState(event, emit));
   }
 
-  Future<void> _mapGetNextAyaToState(GetNextAya event, Emitter<QuranState> emit) async {
+  Future<void> _mapGetNextAyaToState(
+      GetNextAya event, Emitter<QuranState> emit) async {
     try {
       final nextAya = await quranRepository.getNextAya(event.currentAyaIndex);
-      if (nextAya != null) {
-        final randomOptions = await quranRepository.getRandomOptions(nextAya.id);
+      final currentAya =
+          await quranRepository.getCurrentAya(event.currentAyaIndex);
+
+      if (nextAya != null && currentAya != null) {
+        final randomOptions =
+            await quranRepository.getRandomOptions(nextAya.id);
         randomOptions.add(nextAya);
         randomOptions.shuffle(); // ترکیب گزینه‌ها به صورت تصادفی
-        emit(QuranLoaded(nextAya, randomOptions));
+        emit(QuranLoaded(nextAya, randomOptions, currentAya));
       } else {
         emit(QuranError('آیه بعدی یافت نشد'));
       }

@@ -31,6 +31,21 @@ class QuranRepository {
     }
   }
 
+  Future<QuranText?> getCurrentAya(int currentAyaIndex) async {
+    final db = await databaseHelper.database;
+    final result = await db.query(
+      'quran_text',
+      where: '"id" = ?',
+      whereArgs: [currentAyaIndex],
+    );
+
+    if (result.isNotEmpty) {
+      return QuranText.fromMap(result.first);
+    } else {
+      return null;
+    }
+  }
+
   Future<List<QuranText>> getRandomOptions(int correctAyaIndex) async {
     final db = await databaseHelper.database;
     final randomOptions = await db.rawQuery(
