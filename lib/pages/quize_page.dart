@@ -5,8 +5,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:quran_app/Models/quran_text.dart';
 import 'package:quran_app/blocs/bloc/quran_bloc.dart';
 
-Random random = Random();
-int randomNumber = random.nextInt(101) + 1;
+// int randomNumber = random.nextInt(101) + 1;
+int randomNumber = 2;
+int numberNextAyae = 1;
 
 class QuizPage extends StatefulWidget {
   @override
@@ -21,31 +22,36 @@ class _QuizPageState extends State<QuizPage> {
   void initState() {
     super.initState();
     _quranBloc = BlocProvider.of<QuranBloc>(context);
-    _quranBloc?.add(GetNextAya(_currentAyaIndex));
+    // _quranBloc?.add(GetNextAya(_currentAyaIndex));
+    _quranBloc?.add(GetAya(_currentAyaIndex, numberNextAyae));
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Quran Quiz'),
-      ),
-      body: BlocBuilder<QuranBloc, QuranState>(
-        builder: (context, state) {
-          if (state is QuranInitial) {
-            return Center(child: CircularProgressIndicator());
-          } else if (state is QuranLoaded) {
-            return _buildQuiz(
-              state.nextAya,
-              state.currentAya,
-              state.randomOptions,
-            );
-          } else if (state is QuranError) {
-            return Center(child: Text(state.message));
-          } else {
-            return Center(child: Text('Unknown state'));
-          }
-        },
+    return Directionality(
+            textDirection: TextDirection.rtl,
+
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text('Quran Quiz'),
+        ),
+        body: BlocBuilder<QuranBloc, QuranState>(
+          builder: (context, state) {
+            if (state is QuranInitial) {
+              return Center(child: CircularProgressIndicator());
+            } else if (state is QuranLoaded) {
+              return _buildQuiz(
+                state.nextAya,
+                state.currentAya,
+                state.randomOptions,
+              );
+            } else if (state is QuranError) {
+              return Center(child: Text(state.message));
+            } else {
+              return Center(child: Text('Unknown state'));
+            }
+          },
+        ),
       ),
     );
   }
@@ -60,7 +66,8 @@ class _QuizPageState extends State<QuizPage> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
           Text(
-            'What is the next verse after ${currentAya.text}?',
+            '$numberNextAyae'
+            ' آیه بعد از ${currentAya.text} چیست؟',
             style: TextStyle(fontSize: 20.0),
           ),
           SizedBox(height: 20.0),
@@ -73,7 +80,7 @@ class _QuizPageState extends State<QuizPage> {
                   );
                   // درخواست آیه بعدی برای سوال بعدی
                   _currentAyaIndex = nextAya.id;
-                  _quranBloc?.add(GetNextAya(_currentAyaIndex));
+                  _quranBloc?.add(GetAya(_currentAyaIndex,numberNextAyae));
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text('Wrong! Try again.')),

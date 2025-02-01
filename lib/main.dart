@@ -28,14 +28,17 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Quran Quiz App',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: BlocProvider(
-        create: (_) => QuranBloc(quranRepository),
-        child: QuizPage(),
+    return Directionality(
+      textDirection: TextDirection.rtl,
+      child: MaterialApp(
+        title: 'Quran Quiz App',
+        theme: ThemeData(
+          primarySwatch: Colors.blue,
+        ),
+        home: BlocProvider(
+          create: (_) => QuranBloc(quranRepository),
+          child: QuizPage(),
+        ),
       ),
     );
   }
