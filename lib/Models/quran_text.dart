@@ -16,7 +16,7 @@ class QuranText {
     required this.text,
     required this.textClean,
   });
-
+  // تبدیل از Map به مدل
   factory QuranText.fromMap(Map<String, dynamic> map) {
     return QuranText(
       id: map['id'],
@@ -27,5 +27,18 @@ class QuranText {
       text: map['text'],
       textClean: map['text_clean'],
     );
+  }
+
+  // تبدیل مدل به Map
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'joz': joz,
+      'pageNo': pageNo,
+      'sura': sura,
+      'aya': aya,
+      'text': text,
+      'text_clean': textClean,
+    };
   }
 }

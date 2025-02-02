@@ -1,0 +1,6 @@
+class QusestionRepository {
+    
+  void GenerateQuestion(){
+
+  }
+}

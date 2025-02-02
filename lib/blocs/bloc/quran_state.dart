@@ -4,6 +4,8 @@ part of 'quran_bloc.dart';
 abstract class QuranState {}
 
 class QuranInitial extends QuranState {}
+class QuranLoading extends QuranState {}
+
 
 class QuranLoaded extends QuranState {
   final QuranText nextAya;

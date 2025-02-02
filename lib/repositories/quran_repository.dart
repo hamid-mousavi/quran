@@ -21,11 +21,11 @@ class QuranRepository {
     }
   }
 
-  Future<List<QuranText>> getSarAya(int pageNumber) async {
+  Future<List<QuranText>> getAyaByPage(int pageNumber) async {
     final db = await databaseHelper.database;
     final result = await db.query(
       'quran_text',
-      where: 'page = ?', // فرض شده که ستون صفحه به نام 'page' است
+      where: 'pageNo = ?', // فرض شده که ستون صفحه به نام 'page' است
       whereArgs: [pageNumber],
     );
 
@@ -75,12 +75,17 @@ class QuranRepository {
     return randomOptions.map((map) => QuranText.fromMap(map)).toList();
   }
 
-  Future<List<QuranText>> getRandomOptionsForSarAya(int pageNumber) async {
+  Future<List<QuranText>> getRandomOptionsForAyaByPage(int correctPageNumber) async {
     final db = await databaseHelper.database;
     final randomOptions = await db.rawQuery(
-      'SELECT * FROM quran_text WHERE pageNo = ? ORDER BY RANDOM() LIMIT 3',
-      [pageNumber],
+      'SELECT * FROM quran_text WHERE pageNo != ? ORDER BY RANDOM() LIMIT 3',
+      [correctPageNumber],
     );
     return randomOptions.map((map) => QuranText.fromMap(map)).toList();
+    
   }
+
+
+
+  
 }

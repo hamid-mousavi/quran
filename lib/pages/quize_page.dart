@@ -21,24 +21,39 @@ class _QuizPageState extends State<QuizPage> {
   @override
   void initState() {
     super.initState();
-    _quranBloc = BlocProvider.of<QuranBloc>(context);
-    // _quranBloc?.add(GetNextAya(_currentAyaIndex));
-    _quranBloc?.add(GetAya(_currentAyaIndex, numberNextAyae));
+    // _quranBloc = BlocProvider.of<QuranBloc>(context);
+    // // _quranBloc?.add(GetNextAya(_currentAyaIndex));
+    // _quranBloc?.add(GetAya(_currentAyaIndex, numberNextAyae));
   }
 
   @override
   Widget build(BuildContext context) {
     return Directionality(
-            textDirection: TextDirection.rtl,
-
+      textDirection: TextDirection.rtl,
       child: Scaffold(
         appBar: AppBar(
           title: Text('Quran Quiz'),
         ),
         body: BlocBuilder<QuranBloc, QuranState>(
           builder: (context, state) {
-            if (state is QuranInitial) {
+            if (state is QuranLoading) {
               return Center(child: CircularProgressIndicator());
+            }
+            if (state is QuranInitial) {
+              return Center(
+                child: Column(
+                  children: [
+                    TextButton(
+                        onPressed: () {
+                          _quranBloc = BlocProvider.of<QuranBloc>(context);
+                          // _quranBloc?.add(GetNextAya(_currentAyaIndex));
+                          _quranBloc
+                              ?.add(GetSarAya(2));
+                        },
+                        child: Text('ساخت سوالات جدید')),
+                  ],
+                ),
+              );
             } else if (state is QuranLoaded) {
               return _buildQuiz(
                 state.nextAya,
@@ -80,7 +95,7 @@ class _QuizPageState extends State<QuizPage> {
                   );
                   // درخواست آیه بعدی برای سوال بعدی
                   _currentAyaIndex = nextAya.id;
-                  _quranBloc?.add(GetAya(_currentAyaIndex,numberNextAyae));
+                  _quranBloc?.add(GetAya(_currentAyaIndex, numberNextAyae));
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text('Wrong! Try again.')),
@@ -89,6 +104,12 @@ class _QuizPageState extends State<QuizPage> {
               },
               child: Text(option.text),
             ),
+            Expanded(child: SizedBox(height: 10,)),
+          TextButton(
+              onPressed: () {
+                
+              },
+              child: Text('اتمام بازی'))
         ],
       ),
     );
