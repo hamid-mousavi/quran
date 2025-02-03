@@ -13,6 +13,12 @@ import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:quran_app/pages/quiz_settins_page.dart';
 import 'package:flutter/material.dart';
 void main() {
+    WidgetsFlutterBinding.ensureInitialized();
+
+  if (Platform.isWindows || Platform.isLinux) {
+    sqfliteFfiInit();
+    databaseFactory = databaseFactoryFfi;
+  }
   runApp(MyApp());
 }
 

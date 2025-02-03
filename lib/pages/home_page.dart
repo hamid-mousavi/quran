@@ -1,7 +1,9 @@
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:quran_app/pages/quiz_page_test.dart';
 import 'package:quran_app/pages/quiz_settins_page.dart';
+import 'package:quran_app/pages/quize_page.dart';
 
 class HomePage extends StatelessWidget {
   @override
@@ -13,7 +15,7 @@ class HomePage extends StatelessWidget {
           onPressed: () {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => QuizSettingsPage()),
+              MaterialPageRoute(builder: (context) => QuizPageTest()),
             );
           },
           child: Text('ورود به تنظیمات آزمون'),

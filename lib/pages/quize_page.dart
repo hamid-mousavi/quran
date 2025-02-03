@@ -1,116 +1,211 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:quran_app/Models/quran_text.dart';
-import 'package:quran_app/blocs/bloc/quran_bloc.dart';
-
-// int randomNumber = random.nextInt(101) + 1;
-int randomNumber = 2;
-int numberNextAyae = 1;
+import 'package:quran_app/blocs/bloc/quiz_bloc.dart';
+import 'package:quran_app/blocs/bloc/quiz_event.dart';
+import 'package:quran_app/blocs/bloc/quiz_state.dart';
+import 'package:quran_app/repositories/quiz_service.dart';
+import 'package:quran_app/repositories/quran_service.dart';
 
 class QuizPage extends StatefulWidget {
   @override
-  _QuizPageState createState() => _QuizPageState();
+  State<QuizPage> createState() => _QuizPageState();
 }
 
 class _QuizPageState extends State<QuizPage> {
-  QuranBloc? _quranBloc;
-  int _currentAyaIndex = randomNumber; // مقدار اولیه
-
-  @override
-  void initState() {
-    super.initState();
-    // _quranBloc = BlocProvider.of<QuranBloc>(context);
-    // // _quranBloc?.add(GetNextAya(_currentAyaIndex));
-    // _quranBloc?.add(GetAya(_currentAyaIndex, numberNextAyae));
+  int _radioValue = 0;
+  bool _easy = false;
+  bool _medium = false;
+  bool _hard = false;
+  List<bool> _easyOptions = [false, false, false];
+  List<bool> _mediumOptions = [false, false, false];
+  List<bool> _hardOptions = [false, false, false];
+    void _handleRadioValueChange(int? value) {
+    setState(() {
+      _radioValue = value!;
+    });
   }
 
+  void _handleCheckboxChange(bool value, String type, int index) {
+    setState(() {
+      if (type == 'easy') {
+        _easyOptions[index] = value;
+      } else if (type == 'medium') {
+        _mediumOptions[index] = value;
+      } else if (type == 'hard') {
+        _hardOptions[index] = value;
+      }
+    });
+  }
   @override
   Widget build(BuildContext context) {
-    return Directionality(
-      textDirection: TextDirection.rtl,
+    final quranService = QuranService();
+    final quizService = QuizService(quranService: quranService);
+    return BlocProvider(
+      create: (context) => QuizBloc(quizService: quizService),
       child: Scaffold(
         appBar: AppBar(
-          title: Text('Quran Quiz'),
+      
+          title: Text('Quiz'),
         ),
-        body: BlocBuilder<QuranBloc, QuranState>(
+        body: BlocBuilder<QuizBloc, QuizState>(
           builder: (context, state) {
-            if (state is QuranLoading) {
-              return Center(child: CircularProgressIndicator());
-            }
-            if (state is QuranInitial) {
-              return Center(
-                child: Column(
-                  children: [
-                    TextButton(
-                        onPressed: () {
-                          _quranBloc = BlocProvider.of<QuranBloc>(context);
-                          // _quranBloc?.add(GetNextAya(_currentAyaIndex));
-                          _quranBloc
-                              ?.add(GetSarAya(2));
-                        },
-                        child: Text('ساخت سوالات جدید')),
-                  ],
-                ),
-              );
-            } else if (state is QuranLoaded) {
-              return _buildQuiz(
-                state.nextAya,
-                state.currentAya,
-                state.randomOptions,
-              );
-            } else if (state is QuranError) {
-              return Center(child: Text(state.message));
-            } else {
-              return Center(child: Text('Unknown state'));
-            }
+            if (state is QuizInitial) {
+              return Column(
+                children: <Widget>[
+                  
+        Row(
+          children: <Widget>[
+            Radio(
+              value: 0,
+              groupValue: _radioValue,
+              onChanged: _handleRadioValueChange,
+            ),
+            Text('گزینه ۱'),
+            Radio(
+              value: 1,
+              groupValue: _radioValue,
+              onChanged: _handleRadioValueChange,
+            ),
+            Text('گزینه ۲'),
+            Radio(
+              value: 2,
+              groupValue: _radioValue,
+              onChanged: _handleRadioValueChange,
+            ),
+            Text('گزینه ۳'),
+            Radio(
+              value: 3,
+              groupValue: _radioValue,
+              onChanged: _handleRadioValueChange,
+            ),
+            Text('گزینه ۴'),
+          ],
+        ),
+        CheckboxListTile(
+          title: Text('آسان'),
+          value: _easy,
+          onChanged: (bool? value) {
+            setState(() {
+              _easy = value!;
+            });
           },
         ),
-      ),
-    );
-  }
-
-  Widget _buildQuiz(
-      QuranText nextAya, QuranText currentAya, List<QuranText> options) {
-    options.shuffle();
-
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: <Widget>[
-          Text(
-            '$numberNextAyae'
-            ' آیه بعد از ${currentAya.text} چیست؟',
-            style: TextStyle(fontSize: 20.0),
+        if (_easy)
+          Column(
+            children: List.generate(3, (index) {
+              return CheckboxListTile(
+                title: Text('آسان گزینه ${index + 1}'),
+                value: _easyOptions[index],
+                onChanged: (bool? value) {
+                  _handleCheckboxChange(value!, 'easy', index);
+                },
+              );
+            }),
           ),
-          SizedBox(height: 20.0),
-          for (var option in options)
-            ElevatedButton(
-              onPressed: () {
-                if (option.id == nextAya.id) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Correct!')),
-                  );
-                  // درخواست آیه بعدی برای سوال بعدی
-                  _currentAyaIndex = nextAya.id;
-                  _quranBloc?.add(GetAya(_currentAyaIndex, numberNextAyae));
-                } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Wrong! Try again.')),
-                  );
-                }
-              },
-              child: Text(option.text),
-            ),
-            Expanded(child: SizedBox(height: 10,)),
-          TextButton(
-              onPressed: () {
-                
-              },
-              child: Text('اتمام بازی'))
-        ],
+        CheckboxListTile(
+          title: Text('متوسط'),
+          value: _medium,
+          onChanged: (bool? value) {
+            setState(() {
+              _medium = value!;
+            });
+          },
+        ),
+        if (_medium)
+          Column(
+            children: List.generate(3, (index) {
+              return CheckboxListTile(
+                title: Text('متوسط گزینه ${index + 1}'),
+                value: _mediumOptions[index],
+                onChanged: (bool? value) {
+                  _handleCheckboxChange(value!, 'medium', index);
+                },
+              );
+            }),
+          ),
+        CheckboxListTile(
+          title: Text('سخت'),
+          value: _hard,
+          onChanged: (bool? value) {
+            setState(() {
+              _hard = value!;
+            });
+          },
+        ),
+        if (_hard)
+          Column(
+            children: List.generate(3, (index) {
+              return CheckboxListTile(
+                title: Text('سخت گزینه ${index + 1}'),
+                value: _hardOptions[index],
+                onChanged: (bool? value) {
+                  _handleCheckboxChange(value!, 'hard', index);
+                },
+              );
+            }),
+          ),
+    
+                  Center(
+                    child: ElevatedButton(
+                      onPressed: () {
+                        BlocProvider.of<QuizBloc>(context).add(StartQuiz(
+                          level: 'easy',
+                          // selectedTypes: ['translation', 'previous_next'],
+                          selectedTypes: ['previous_next'],
+                          questionType: 'multiple_choice',
+                          startPage: 1,
+                          endPage: 10,
+                          questionCount: 10,
+                        ));
+                      },
+                      child: Text("Start Quiz"),
+                    ),
+                  ),
+                ],
+              );
+            } else if (state is QuizLoading) {
+              return Center(child: CircularProgressIndicator());
+            } else if (state is QuizLoaded) {
+              var question = state.questions[state.currentIndex];
+              return Column(
+                children: [
+                  Text(
+                      "Question ${state.currentIndex + 1}: ${question['question']}"),
+                  ...(question['options'] as List<String>).map((option) {
+                    return ElevatedButton(
+                      onPressed: () {
+                        BlocProvider.of<QuizBloc>(context)
+                            .add(AnswerQuestion(selectedAnswer: option));
+                      },
+                      child: Text(option),
+                    );
+                  }).toList(),
+                ],
+              );
+            } else if (state is QuizFinished) {
+              return Column(
+                children: [
+                  Text(
+                      "Quiz Finished! Correct Answers: ${state.correctAnswers} / ${state.totalQuestions}"),
+                  ElevatedButton(
+                    onPressed: () {
+                      BlocProvider.of<QuizBloc>(context).add(StartQuiz(
+                        level: 'easy',
+                        selectedTypes: ['translation'],
+                        questionType: 'multiple_choice',
+                        startPage: 10,
+                        endPage: 20,
+                        questionCount: 10,
+                      ));
+                    },
+                    child: Text("Restart"),
+                  ),
+                ],
+              );
+            }
+            return Container();
+          },
+        ),
       ),
     );
   }

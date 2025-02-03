@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:quran_app/blocs/bloc/quiz_bloc.dart';
 import 'package:quran_app/blocs/bloc/quiz_state.dart';
+import 'package:quran_app/pages/quize_page.dart';
 
 class QuizSettingsPage extends StatelessWidget {
   @override
@@ -12,7 +13,7 @@ class QuizSettingsPage extends StatelessWidget {
         padding: const EdgeInsets.all(16.0),
         child: Center(
           child: TextButton(onPressed: (){
-            
+            Navigator.push(context, MaterialPageRoute(builder: (context) => QuizPage(),));
           }, child: Text('آزمون')),
         ),
       ),
