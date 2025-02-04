@@ -45,81 +45,72 @@ class _QuizPageTestState extends State<QuizPageTest> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      theme: ThemeData(
-        primaryColor: Colors.purple,
-        hintColor: Colors.purpleAccent,
-        buttonTheme: ButtonThemeData(
-          buttonColor: Colors.purple, 
-          textTheme: ButtonTextTheme.primary,
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Quiz Page'),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: _goToPreviousQuestion,
         ),
       ),
-      home: Scaffold(
-        appBar: AppBar(
-          title: Text('Quiz Page'),
-          leading: IconButton(
-            icon: Icon(Icons.arrow_back),
-            onPressed: _goToPreviousQuestion,
-          ),
-        ),
-        body: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Text('Question ${_currentQuestionIndex + 1} of $_totalQuestions'),
-                  Spacer(),
-                  CircularPercentIndicator(
-                    radius: 60.0,
-                    lineWidth: 5.0,
-                    percent: _currentQuestionIndex / _totalQuestions,
-                    center: new Text(
-                      "${((_currentQuestionIndex / _totalQuestions) * 100).toStringAsFixed(0)}%",
-                      style: TextStyle(color: Colors.black),
-                    ),
-                    progressColor: Colors.purple,
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Text(
+                    'Question ${_currentQuestionIndex + 1} of $_totalQuestions'),
+                Spacer(),
+                CircularPercentIndicator(
+                  radius: 60.0,
+                  lineWidth: 5.0,
+                  percent: _currentQuestionIndex / _totalQuestions,
+                  center: new Text(
+                    "${((_currentQuestionIndex / _totalQuestions) * 100).toStringAsFixed(0)}%",
+                    style: TextStyle(color: Colors.black),
                   ),
-                  SizedBox(width: 10),
-                  Row(
-                    children: [
-                      Icon(Icons.check, color: Colors.green),
-                      Text(' $_correctAnswers '),
-                      Icon(Icons.close, color: Colors.orange),
-                      Text(' $_wrongAnswers '),
-                    ],
-                  ),
-                ],
-              ),
-              Divider(),
-              Text(
-                _questions[_currentQuestionIndex],
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              SizedBox(height: 20),
-              ..._choices[_currentQuestionIndex].map((choice) {
-                return RadioListTile(
-                  title: Text(choice),
-                  value: _choices[_currentQuestionIndex].indexOf(choice),
-                  groupValue: _selectedChoice,
-                  onChanged: (value) {
-                    setState(() {
-                      _selectedChoice = value!;
-                    });
-                  },
-                );
-              }).toList(),
-              Spacer(),
-              ElevatedButton(
-                onPressed: _submitAnswer,
-                child: Text('Submit'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.purple,
+                  progressColor: Colors.purple,
                 ),
-              )
-            ],
-          ),
+                SizedBox(width: 10),
+                Row(
+                  children: [
+                    Icon(Icons.check, color: Colors.green),
+                    Text(' $_correctAnswers '),
+                    Icon(Icons.close, color: Colors.orange),
+                    Text(' $_wrongAnswers '),
+                  ],
+                ),
+              ],
+            ),
+            Divider(),
+            Text(
+              _questions[_currentQuestionIndex],
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 20),
+            ..._choices[_currentQuestionIndex].map((choice) {
+              return RadioListTile(
+                title: Text(choice),
+                value: _choices[_currentQuestionIndex].indexOf(choice),
+                groupValue: _selectedChoice,
+                onChanged: (value) {
+                  setState(() {
+                    _selectedChoice = value!;
+                  });
+                },
+              );
+            }).toList(),
+            Spacer(),
+            ElevatedButton(
+              onPressed: _submitAnswer,
+              child: Text('Submit'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.purple,
+              ),
+            )
+          ],
         ),
       ),
     );
