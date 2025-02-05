@@ -64,13 +64,13 @@ class QuizService {
       var options = [correctAnswer, ...wrongAnswers]..shuffle();
 
       return {
-        'question': 'What is the translation of this verse?',
+        'question': 'ترجمه آیه زیر چیست؟',
         'options': options,
         'correctAnswer': correctAnswer,
       };
     } else {
       return {
-        'question': 'Explain the meaning of this verse: ${verse.textClean}',
+        'question': 'مفهوم آیه زیر را شرح دهید: ${verse.textClean}',
         'correctAnswer': verse.textClean,
       };
     }
@@ -83,9 +83,9 @@ class QuizService {
     var nextVerse =
         await quranService.getVerseBySuraAya(verse.sura, verse.aya + 1);
     var wrongVerse =
-        await quranService.getVerseBySuraAya(verse.sura, verse.aya + 10);
+        await quranService.getVerseBySuraAya(verse.sura, verse.aya + 2);
     var wrongVerse2 =
-        await quranService.getVerseBySuraAya(verse.sura, verse.aya + 8);
+        await quranService.getVerseBySuraAya(verse.sura, verse.aya + 3);
 
     if (questionType == 'multiple_choice') {
       return {
@@ -101,7 +101,7 @@ class QuizService {
     } else {
       return {
         'question':
-            'What is the previous and next verse for this?\n"${verse.textClean}"',
+            'آیات قبلی و بعدی را انتخاب کنید\n"${verse.textClean}"',
         'correctAnswer':
             '${prevVerse?.textClean ?? ''} / ${nextVerse?.textClean ?? ''}',
       };

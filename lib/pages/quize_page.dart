@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dialogs/flutter_dialogs.dart';
 import 'package:quran_app/blocs/bloc/quiz_bloc.dart';
@@ -17,19 +18,37 @@ class _QuizPageState extends State<QuizPage> {
   bool _easy = false;
   bool _medium = false;
   bool _hard = false;
+  Color myColor = Colors.black;
   List<bool> _easyOptions = [false, false, false];
   List<bool> _mediumOptions = [false, false, false];
   List<bool> _hardOptions = [false, false, false];
+  List<String> _levelTxt = ['easy', 'meduim', 'hard'];
+  List<String> _questionTypeTxt = ['multiple_choice'];
+  List<String> _typeTxt = ['translation', 'previous_next', 'sura_start'];
+  List<String> _typePersianTxt = ['ترجمه', 'آیه بعدی و قبلی', 'شروع سوره'];
+
+  List<String> selectedTypes = [];
+  final _formKey = GlobalKey<FormState>();
+  int? startPage = 1;
+  int? endPage = 604;
+
   void _handleRadioValueChange(int? value) {
     setState(() {
       _radioValue = value!;
     });
   }
 
-  void _handleCheckboxChange(bool value, String type, int index) {
+  void _handleCheckboxChange(
+      bool value, String type, int index, String _typeTxt) {
     setState(() {
       if (type == 'easy') {
         _easyOptions[index] = value;
+        if (value) {
+          selectedTypes.add(_typeTxt);
+        } else {
+          selectedTypes.remove(_typeTxt);
+        }
+        print(selectedTypes);
       } else if (type == 'medium') {
         _mediumOptions[index] = value;
       } else if (type == 'hard') {
@@ -62,25 +81,28 @@ class _QuizPageState extends State<QuizPage> {
                           groupValue: _radioValue,
                           onChanged: _handleRadioValueChange,
                         ),
-                        Text('گزینه ۱'),
+                        Text('چهارگزینه ای'),
                         Radio(
                           value: 1,
                           groupValue: _radioValue,
-                          onChanged: _handleRadioValueChange,
+                          // onChanged: _handleRadioValueChange,
+                          onChanged: (value) {},
                         ),
-                        Text('گزینه ۲'),
+                        Text('تشریحی'),
                         Radio(
                           value: 2,
                           groupValue: _radioValue,
-                          onChanged: _handleRadioValueChange,
+                          // onChanged: _handleRadioValueChange,
+                          onChanged: (value) {},
                         ),
-                        Text('گزینه ۳'),
+                        Text('صوتی'),
                         Radio(
                           value: 3,
                           groupValue: _radioValue,
-                          onChanged: _handleRadioValueChange,
+                          // onChanged: _handleRadioValueChange,
+                          onChanged: (value) {},
                         ),
-                        Text('گزینه ۴'),
+                        Text('صوتی'),
                       ],
                     ),
                     CheckboxListTile(
@@ -96,70 +118,152 @@ class _QuizPageState extends State<QuizPage> {
                       Column(
                         children: List.generate(3, (index) {
                           return CheckboxListTile(
-                            title: Text('آسان گزینه ${index + 1}'),
+                            title: Text(_typePersianTxt[index]),
                             value: _easyOptions[index],
                             onChanged: (bool? value) {
-                              _handleCheckboxChange(value!, 'easy', index);
+                              _handleCheckboxChange(
+                                  value!, _levelTxt[0], index, _typeTxt[index]);
                             },
                           );
                         }),
                       ),
-                    CheckboxListTile(
-                      title: Text('متوسط'),
-                      value: _medium,
-                      onChanged: (bool? value) {
-                        setState(() {
-                          _medium = value!;
-                        });
-                      },
-                    ),
-                    if (_medium)
-                      Column(
-                        children: List.generate(3, (index) {
-                          return CheckboxListTile(
-                            title: Text('متوسط گزینه ${index + 1}'),
-                            value: _mediumOptions[index],
-                            onChanged: (bool? value) {
-                              _handleCheckboxChange(value!, 'medium', index);
+                    // CheckboxListTile(
+                    //   title: Text(_levelTxt[1]),
+                    //   value: _medium,
+                    //   onChanged: (bool? value) {
+                    //     setState(() {
+                    //       _medium = value!;
+                    //     });
+                    //   },
+                    // ),
+                    // if (_medium)
+                    //   Column(
+                    //     children: List.generate(3, (index) {
+                    //       return CheckboxListTile(
+                    //         title: Text('متوسط گزینه ${index + 1}'),
+                    //         value: _mediumOptions[index],
+                    //         onChanged: (bool? value) {
+                    //           _handleCheckboxChange(
+                    //               value!, _levelTxt[1], index, _typeTxt[index]);
+                    //         },
+                    //       );
+                    //     }),
+                    //   ),
+                    // CheckboxListTile(
+                    //   title: Text(_levelTxt[2]),
+                    //   value: _hard,
+                    //   onChanged: (bool? value) {
+                    //     setState(() {
+                    //       _hard = value!;
+                    //     });
+                    //   },
+                    // ),
+                    // if (_hard)
+                    //   Column(
+                    //     children: List.generate(3, (index) {
+                    //       return CheckboxListTile(
+                    //         title: Text('سخت گزینه ${index + 1}'),
+                    //         value: _hardOptions[index],
+                    //         onChanged: (bool? value) {
+                    //           _handleCheckboxChange(
+                    //               value!, _levelTxt[2], index, _typeTxt[index]);
+                    //         },
+                    //       );
+                    //     }),
+                    //   ),
+                    Form(
+                      key: _formKey,
+                      child: Column(
+                        children: [
+                          TextFormField(
+                            decoration: const InputDecoration(                            
+                              labelText: 'شروع صفحه',
+                              border: OutlineInputBorder(),
+                            ),
+                            keyboardType:
+                                TextInputType.number, // صفحه‌کلید عددی
+                            inputFormatters: [
+                              FilteringTextInputFormatter
+                                  .digitsOnly // فقط اعداد مجاز هستند
+                            ],
+                            onChanged: (value) {
+                              setState(() {
+                                startPage =
+                                    int.tryParse(value); // تبدیل مقدار به int
+                              });
                             },
-                          );
-                        }),
-                      ),
-                    CheckboxListTile(
-                      title: Text('سخت'),
-                      value: _hard,
-                      onChanged: (bool? value) {
-                        setState(() {
-                          _hard = value!;
-                        });
-                      },
-                    ),
-                    if (_hard)
-                      Column(
-                        children: List.generate(3, (index) {
-                          return CheckboxListTile(
-                            title: Text('سخت گزینه ${index + 1}'),
-                            value: _hardOptions[index],
-                            onChanged: (bool? value) {
-                              _handleCheckboxChange(value!, 'hard', index);
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'لطفاً Start Page را وارد کنید';
+                              }
+                              if (int.tryParse(value) == null) {
+                                return 'لطفاً یک عدد معتبر وارد کنید';
+                              }
+                              final intValue = int.parse(value);
+                              if (intValue > 604) {
+                                return 'عدد باید حداکثر 604 باشد';
+                              }
+                              return null;
                             },
-                          );
-                        }),
-                      ),
-                    Center(
-                      child: ElevatedButton(
-                        onPressed: () {
-                          BlocProvider.of<QuizBloc>(context).add(StartQuiz(
-                            level: 'easy',
-                            // selectedTypes: ['translation', 'previous_next'],
-                            selectedTypes: ['previous_next'],
-                            questionType: 'multiple_choice',
-                            startPage: 1,
-                            endPage: 10,
-                            questionCount: 10,
-                          ));
-                        },
-                        child: Text("Start Quiz"),
+                          ),
+                          SizedBox(height: 20),
+                          TextFormField(
+                            decoration: InputDecoration(
+                              labelText: 'پایان صفحه',
+                              border: OutlineInputBorder(),
+                            ),
+                            keyboardType:
+                                TextInputType.number, // صفحه‌کلید عددی
+                            inputFormatters: [
+                              FilteringTextInputFormatter
+                                  .digitsOnly // فقط اعداد مجاز هستند
+                            ],
+                            onChanged: (value) {
+                              setState(() {
+                                endPage =
+                                    int.tryParse(value); // تبدیل مقدار به int
+                              });
+                            },
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'لطفاً Start Page را وارد کنید';
+                              }
+                              if (int.tryParse(value) == null) {
+                                return 'لطفاً یک عدد معتبر وارد کنید';
+                              }
+                              final intValue = int.parse(value);
+                              if (intValue > 604) {
+                                return 'عدد باید حداکثر 604 باشد';
+                              }
+                              return null;
+                            },
+                          ),
+                          SizedBox(height: 20),
+                          Center(
+                            child: ElevatedButton(
+                              onPressed: () {
+                                if (selectedTypes.isNotEmpty) {
+                                  BlocProvider.of<QuizBloc>(context)
+                                      .add(StartQuiz(
+                                    level: 'easy',
+                                    selectedTypes: selectedTypes,
+                                    questionType: 'multiple_choice',
+                                    startPage: startPage!,
+                                    endPage: endPage!,
+                                    questionCount: 10,
+                                  ));
+                                } else {
+                                  ScaffoldMessenger.of(context)
+                                      .showSnackBar(const SnackBar(
+                                    content:
+                                        Text("یکی از گزینه ها را انتخاب کنید"),
+                                  ));
+                                }
+                              },
+                              child: Text("شروع", style: TextStyle(fontSize: 20),),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ],
@@ -168,81 +272,134 @@ class _QuizPageState extends State<QuizPage> {
                 return Center(child: CircularProgressIndicator());
               } else if (state is QuizLoaded) {
                 var question = state.questions[state.currentIndex];
-                return Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Container(
-                        decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(20)),
-                        child: Padding(
-                          padding: const EdgeInsets.fromLTRB(8, 30, 8, 30),
-                          child: Text(
-                              "سوال ${state.currentIndex + 1}: ${question['question']}"),
-                        ),
-                      ),
-                    ),
-                    ...(question['options'] as List<String>).map((option) {
-                      return Padding(
-                        padding: const EdgeInsets.all(8.0),
+                return SingleChildScrollView(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: EdgeInsets.all(8.0),
                         child: Container(
+                          width: double.infinity,
                           decoration: BoxDecoration(
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(
+                                      0.3), // رنگ سایه با شفافیت ۱۵٪
+                                  offset:
+                                      Offset(0, 20), // موقعیت سایه (x=0, y=20)
+                                  spreadRadius: -5, // گسترش سایه
+                                  blurRadius: 20, // محو شدن سایه
+                                ),
+                              ],
                               color: Colors.white,
                               borderRadius: BorderRadius.circular(20)),
-                          width: double.infinity,
-                          child: TextButton(
-                            style: ButtonStyle(
-                                backgroundColor:
-                                    WidgetStatePropertyAll(Colors.white)),
-                            onPressed: () {
-                              BlocProvider.of<QuizBloc>(context)
-                                  .add(AnswerQuestion(selectedAnswer: option));
-                            },
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
+                          child: Padding(
+                            padding: const EdgeInsets.fromLTRB(8, 30, 8, 30),
+                            child: Column(
                               children: [
-                                Expanded(
-                                  child: Text(
-                                    option,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ),
-                                IconButton(
-                                  icon: Icon(Icons.info_outline),
-                                  onPressed: () {
-                                    showPlatformDialog(
-                                        context: context,
-                                        builder: (BuildContext context) {
-                                          return BasicDialogAlert(
-                                            title: Text(""),
-                                            content: Text(
-                                              option,
-                                              style: TextStyle(
-                                                color: Colors.black87,
-                                                fontSize: 16,
-                                              ),
-                                            ),
-                                            actions: <Widget>[
-                                              BasicDialogAction(
-                                                title: Text("بستن"),
-                                                onPressed: () {
-                                                  Navigator.pop(context);
-                                                },
-                                              ),
-                                            ],
-                                          );
-                                        });
-                                  },
-                                ),
+                                Text(
+                                    style: const TextStyle(
+                                        fontFamily: 'osmantaha',
+                                        fontSize: 24,
+                                        color: Colors.black,
+                                        fontWeight: FontWeight.bold),
+                                    "سوال ${state.currentIndex + 1}: ${question['question']}"),
                               ],
                             ),
                           ),
                         ),
-                      );
-                    }).toList(),
-                  ],
+                      ),
+                      SizedBox(height: 80),
+                      ...(question['options'] as List<String>).map((option) {
+                        return Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Container(
+                            decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(20)),
+                            width: double.infinity,
+                            child: TextButton(
+                              style: ButtonStyle(
+                                foregroundColor:
+                                    WidgetStateProperty.resolveWith<Color>(
+                                  (Set<WidgetState> states) {
+                                    if (states.contains(WidgetState.hovered)) {
+                                      return Colors.white; // رنگ متن هنگام هاور
+                                    }
+                                    return Colors.blue; // رنگ متن پیش‌فرض
+                                  },
+                                ),
+                                backgroundColor:
+                                    WidgetStateProperty.resolveWith<Color>(
+                                  (Set<WidgetState> states) {
+                                    if (states.contains(WidgetState.hovered)) {
+                                      return Colors
+                                          .blue; // رنگ پس‌زمینه هنگام هاور
+                                    }
+                                    return Colors
+                                        .transparent; // رنگ پس‌زمینه پیش‌فرض
+                                  },
+                                ),
+                                overlayColor:
+                                    WidgetStateProperty.resolveWith<Color>(
+                                  (Set<WidgetState> states) {
+                                    if (states.contains(WidgetState.pressed)) {
+                                      return Colors.blue
+                                          .withOpacity(0.2); // رنگ هنگام کلیک
+                                    }
+                                    return Colors.transparent; // رنگ پیش‌فرض
+                                  },
+                                ),
+                              ),
+                              onPressed: () {
+                                BlocProvider.of<QuizBloc>(context).add(
+                                    AnswerQuestion(selectedAnswer: option));
+                              },
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                      style: TextStyle(color: Colors.black),
+                                      option,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                  IconButton(
+                                    icon: Icon(Icons.info_outline),
+                                    onPressed: () {
+                                      showPlatformDialog(
+                                          context: context,
+                                          builder: (BuildContext context) {
+                                            return BasicDialogAlert(
+                                              title: Text(""),
+                                              content: Text(
+                                                option,
+                                                style: TextStyle(
+                                                  color: Colors.black87,
+                                                  fontSize: 16,
+                                                ),
+                                              ),
+                                              actions: <Widget>[
+                                                BasicDialogAction(
+                                                  title: Text("بستن"),
+                                                  onPressed: () {
+                                                    Navigator.pop(context);
+                                                  },
+                                                ),
+                                              ],
+                                            );
+                                          });
+                                    },
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        );
+                      }).toList(),
+                    ],
+                  ),
                 );
               } else if (state is QuizFinished) {
                 return Column(
@@ -253,10 +410,10 @@ class _QuizPageState extends State<QuizPage> {
                       onPressed: () {
                         BlocProvider.of<QuizBloc>(context).add(StartQuiz(
                           level: 'easy',
-                          selectedTypes: ['translation'],
+                          selectedTypes: selectedTypes,
                           questionType: 'multiple_choice',
-                          startPage: 10,
-                          endPage: 20,
+                          startPage: startPage!,
+                          endPage: endPage!,
                           questionCount: 10,
                         ));
                       },

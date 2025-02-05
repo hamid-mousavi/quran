@@ -28,6 +28,15 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       theme: ThemeData(
+          fontFamily: 'osmantaha',
+          textTheme: TextTheme(),
+          textButtonTheme: TextButtonThemeData(
+              style: ButtonStyle(
+                  textStyle: WidgetStatePropertyAll(TextStyle(
+            fontSize: 24,
+            color: Colors.black,
+            fontFamily: 'osmantaha',
+          )))),
           elevatedButtonTheme: const ElevatedButtonThemeData(
               style: ButtonStyle(
                   foregroundColor: WidgetStatePropertyAll<Color>(
