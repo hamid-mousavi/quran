@@ -17,7 +17,8 @@ class QuizBloc extends Bloc<QuizEvent, QuizState> {
     emit(QuizLoading());
 
     try {
-      List<Map<String, dynamic>> questions = await quizService.generateRandomQuestions(
+      List<Map<String, dynamic>> questions =
+          await quizService.generateRandomQuestions(
         level: event.level,
         selectedTypes: event.selectedTypes,
         questionType: event.questionType,
@@ -43,13 +44,18 @@ class QuizBloc extends Bloc<QuizEvent, QuizState> {
       final currentQuestion = currentState.questions[currentState.currentIndex];
 
       bool isCorrect = event.selectedAnswer == currentQuestion['correctAnswer'];
-      int newCorrectAnswers = isCorrect ? currentState.correctAnswers + 1 : currentState.correctAnswers;
+      int newCorrectAnswers = isCorrect
+          ? currentState.correctAnswers + 1
+          : currentState.correctAnswers;
       int newIndex = currentState.currentIndex + 1;
 
       if (newIndex < currentState.questions.length) {
-        emit(currentState.copyWith(currentIndex: newIndex, correctAnswers: newCorrectAnswers));
+        emit(currentState.copyWith(
+            currentIndex: newIndex, correctAnswers: newCorrectAnswers));
       } else {
-        emit(QuizFinished(correctAnswers: newCorrectAnswers, totalQuestions: currentState.questions.length));
+        emit(QuizFinished(
+            correctAnswers: newCorrectAnswers,
+            totalQuestions: currentState.questions.length));
       }
     }
   }
@@ -57,7 +63,9 @@ class QuizBloc extends Bloc<QuizEvent, QuizState> {
   void _onFinishQuiz(FinishQuiz event, Emitter<QuizState> emit) {
     if (state is QuizLoaded) {
       final currentState = state as QuizLoaded;
-      emit(QuizFinished(correctAnswers: currentState.correctAnswers, totalQuestions: currentState.questions.length));
+      emit(QuizFinished(
+          correctAnswers: currentState.correctAnswers,
+          totalQuestions: currentState.questions.length));
     }
   }
 }
